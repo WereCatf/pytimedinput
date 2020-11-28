@@ -1,0 +1,1 @@
+from .pyTimedInput import timedInput
