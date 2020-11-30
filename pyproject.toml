@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyTimedInput"
-version = "1.1.0"
+version = "1.1.1"
 description = "Query a user for input with a timeout."
 authors = ["WereCatf <werecatf@runbox.com>"]
 maintainers = ["WereCatf <werecatf@runbox.com>"]

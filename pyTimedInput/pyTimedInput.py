@@ -58,7 +58,7 @@ def timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, 
             return userInput, timedOut
 
 
-def timedKey(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, endCharacters: list = ['\x1b', '\n', '\r']) -> Tuple[str, bool]:
+def timedKey(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, endCharacters: list = ['n', 'y']) -> Tuple[str, bool]:
     if(not sys.__stdin__.isatty()):
         raise RuntimeError(
             "timedKey() requires an interactive shell, cannot continue.")
