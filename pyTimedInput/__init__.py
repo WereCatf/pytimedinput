@@ -1,1 +1,2 @@
-from .pyTimedInput import timedInput
+from .pyTimedInput import timedInput, timedKey
+__all__ = ['timedInput', 'timedKey']
