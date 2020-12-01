@@ -29,7 +29,15 @@ def timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, 
                 inputCharacter = msvcrt.getwche()
                 if(inputCharacter in endCharacters):
                     break
-                userInput = userInput + inputCharacter
+                if(inputCharacter != '\b'):
+                    userInput = userInput + inputCharacter
+                else:
+                    if(len(userInput)):
+                        userInput = userInput[0:len(userInput) - 1]
+                        print(" \b", end='', flush=True)
+                    elif(len(prompt)):
+                        print(
+                            prompt[len(prompt) - 1: len(prompt)], end='', flush=True)
                 if(not forcedTimeout):
                     timeStart = time.time()
         print("")
@@ -48,8 +56,12 @@ def timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, 
                     inputCharacter = sys.stdin.read(1)
                     if(inputCharacter in endCharacters):
                         break
-                    userInput = userInput + inputCharacter
-                    print(inputCharacter, end='', flush=True)
+                    if(inputCharacter != '\b' and inputCharacter != '\x7f'):
+                        userInput = userInput + inputCharacter
+                        print(inputCharacter, end='', flush=True)
+                    elif(len(userInput)):
+                        userInput = userInput[0:len(userInput) - 1]
+                        print("\u001b[1D \u001b[1D", end='', flush=True)
                     if(not forcedTimeout):
                         timeStart = time.time()
         finally:
