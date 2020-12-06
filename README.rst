@@ -1,4 +1,4 @@
-pyTimedInput
+pytimedinput
 ============
 
 Description
@@ -6,14 +6,14 @@ Description
 
 A tiny, simplistic little alternative to the standard Python input()-function allowing you to specify a timeout for the function.
 
-pyTimedInput should work on both Windows and Linux, though no exceedingly extensive testing has been done and there might be bugs.
+pytimedinput should work on both Windows and Linux, though no exceedingly extensive testing has been done and there might be bugs.
 
 Install
 -------
 
 .. code:: bash
 
-    $ pip3 install pyTimedInput
+    $ pip3 install pytimedinput
 
 Usage
 -----
@@ -27,7 +27,7 @@ timedInput()
 
     def timedInput(prompt="", timeOut=5, forcedTimeout=False, maxLength=0)
 
-The function *timedInput()* from *pyTimedInput* accepts the following parameters:
+The function *timedInput()* from *pytimedinput* accepts the following parameters:
 
  - **prompt**, *str*: a string to show the user as a prompt when waiting for input.
      *Defaults to an empty string.*
@@ -45,7 +45,7 @@ The function returns a tuple of:
 
 .. code:: python
 
-    from pyTimedInput import timedInput
+    from pytimedinput import timedInput
     userText, timedOut = timedInput("Please, do enter something: ")
     if(timedOut):
         print("Timed out when waiting for input.")
@@ -61,7 +61,7 @@ timedKey()
 
     def timedKey(prompt="", timeOut=5, forcedTimeout=False, allowCharacters=['y', 'n'])
 
-The function *timedKey()* from *pyTimedInput* accepts the following parameters:
+The function *timedKey()* from *pytimedinput* accepts the following parameters:
 
  - **prompt**, *str*: a string to show the user as a prompt when waiting for input.
      *Defaults to an empty string.*
@@ -79,7 +79,7 @@ The function returns a tuple of:
 
 .. code:: python
 
-    from pyTimedInput import timedKey
+    from pytimedinput import timedKey
     userText, timedOut = timedKey("Please, press 'y' to accept or 'n' to decline: ", endCharacters=['y', 'n'])
     if(timedOut):
         print("Timed out when waiting for input. Pester the user later.")
@@ -97,7 +97,7 @@ timedInteger() and timedFloat()
 
     def timedInteger(prompt="", timeOut=5, forcedTimeout=False, maxLength=0)
 
-The function *timedInteger()* and *timedFloat()* from *pyTimedInput* accept the following parameters:
+The function *timedInteger()* and *timedFloat()* from *pytimedinput* accept the following parameters:
 
  - **prompt**, *str*: a string to show the user as a prompt when waiting for input.
      *Defaults to an empty string.*
@@ -115,7 +115,7 @@ The function returns a tuple of:
 
 .. code:: python
 
-    from pyTimedInput import *
+    from pytimedinput import *
     userText, timedOut = timedInput("Please, do enter something: ")
     if(timedOut):
         print("Timed out when waiting for input.")
