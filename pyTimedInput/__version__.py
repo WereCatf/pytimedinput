@@ -1,7 +1,7 @@
 __title__ = 'pyTimedInput'
 __description__ = 'Query user for input with a timeout.'
 __url__ = 'https://github.com/werecatf/pytimedinput'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __author__ = 'WereCatf'
 __author_email__ = 'werecatf@runbox.com'
 __license__ = 'MIT'
