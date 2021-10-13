@@ -13,41 +13,88 @@ else:
 import time
 
 
-# '\x1b' == ESC
-def timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, maxLength: int = 0) -> Tuple[str, bool]:
-    return __timedInput(prompt, timeOut, forcedTimeout, maxLength, allowCharacters=[], endCharacters=['\x1b', '\n', '\r'])
+def timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r") -> Tuple[str, bool]:
+    """Ask the user for text input with an optional timeout and limit on allowed characters.
+
+    Args:
+        prompt (str, optional): The prompt to be displayed to the user. Defaults to "".
+        timeout (int, optional): How many seconds to wait for input. Defaults to 5, use -1 to wait forever.
+        resetOnInput (bool, optional): Reset the timeout-timer any time user presses a key. Defaults to True.
+        maxLength (int, optional): Maximum length of input user is to be allowed to type. Defaults to 0, use 0 to disable. 
+        allowCharacters (str, optional): Which characters the user is allowed to enter. Defaults to "", ie. any character.
+        endCharacters (str, optional): On which characters to stop accepting input. Defaults to "\\x1b\\n\\r", ie. ESC and Enter. Cannot be empty.
+
+    Returns:
+        Tuple[str, bool]: The characters input by the user and whether the input timed out or not.
+    """
+    if(maxLength < 0):
+        return "", False
+    if(len(endCharacters) == 0):
+        return "", False
+    return __timedInput(prompt, timeout, resetOnInput, maxLength, allowCharacters, endCharacters)
 
 
-def timedKey(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, allowCharacters: list = ['n', 'y']) -> Tuple[str, bool]:
-    return __timedInput(prompt, timeOut, forcedTimeout, maxLength=1, allowCharacters=allowCharacters, endCharacters=[], inputType="single")
+def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowCharacters: str = "") -> Tuple[str, bool]:
+    """Ask the user to press a single key out of an optional list of allowed ones.
+
+    Args:
+        prompt (str, optional): The prompt to be displayed to the user. Defaults to "".
+        timeout (int, optional): How many seconds to wait for input. Defaults to 5, use -1 to wait forever.
+        resetOnInput (bool, optional): Reset the timeout-timer any time user presses a key. Defaults to True.
+        allowCharacters (str, optional): Which characters the user is allowed to enter. Defaults to "", ie. any character.
+
+    Returns:
+        Tuple[str, bool]: Which key the user pressed and whether the input timed out or not.
+    """
+    return __timedInput(prompt, timeout, resetOnInput, maxLength=1, allowCharacters=allowCharacters, endCharacters="", inputType="single")
 
 
-def timedInteger(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, maxLength: int = 0) -> Tuple[Union[int, None], bool]:
+def timedInteger(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[int, None], bool]:
+    """Ask the user to enter an integer value.
+
+    Args:
+        prompt (str, optional): The prompt to be displayed to the user. Defaults to "".
+        timeout (int, optional): How many seconds to wait for input. Defaults to 5, use -1 to wait forever.
+        resetOnInput (bool, optional): Reset the timeout-timer any time user presses a key. Defaults to True.
+        allowNegative (bool, optional): Whether to allow the user to enter a negative value or not.
+
+    Returns:
+        Tuple[Union[int, None], bool]: The value entered by the user and whether the input timed out or not.
+    """
     userInput, timedOut = __timedInput(
-        prompt, timeOut, forcedTimeout, maxLength, inputType="integer")
+        prompt, timeout, resetOnInput, allowCharacters="-" if(allowNegative) else "", inputType="integer")
     try:
         return int(userInput), timedOut
     except:
         return None, timedOut
 
 
-def timedFloat(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, maxLength: int = 0) -> Tuple[Union[float, None], bool]:
+def timedFloat(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[float, None], bool]:
+    """Ask the user to enter a floating-point value.
+
+    Args:
+        prompt (str, optional): The prompt to be displayed to the user. Defaults to "".
+        timeout (int, optional): How many seconds to wait for input. Defaults to 5, use -1 to wait forever.
+        resetOnInput (bool, optional): Reset the timeout-timer any time user presses a key. Defaults to True.
+        allowNegative (bool, optional): Whether to allow the user to enter a negative value or not.
+
+    Returns:
+        Tuple[Union[float, None], bool]: The value entered by the user and whether the input timed out or not.
+    """
     userInput, timedOut = __timedInput(
-        prompt, timeOut, forcedTimeout, maxLength, inputType="float")
+        prompt, timeout, resetOnInput, allowCharacters="-" if(allowNegative) else "", inputType="float")
     try:
         return float(userInput), timedOut
     except:
         return None, timedOut
 
 
-def __timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False, maxLength: int = 0, allowCharacters: list = [], endCharacters: list = ['\x1b', '\n', '\r'], inputType: str = "text") -> Tuple[str, bool]:
-    numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text") -> Tuple[str, bool]:
+    numbers = "01234567890"
     if(inputType == "integer"):
-        allowCharacters = numbers
+        allowCharacters += numbers
     if(inputType == "float"):
-        allowCharacters = numbers
-        allowCharacters.append(".")
-        allowCharacters.append(",")
+        allowCharacters += numbers + ".,"
 
     if(not sys.__stdin__.isatty()):
         raise RuntimeError(
@@ -68,7 +115,6 @@ def __timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False
     userInput = ""
     timeStart = time.time()
     timedOut = False
-    periods = 0
     if(len(prompt) > 0):
         print(prompt, end='', flush=True, file=outStream)
 
@@ -77,7 +123,7 @@ def __timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False
         tty.setcbreak(sys.stdin.fileno())
 
     while(True):
-        if((time.time() - timeStart) >= timeOut):
+        if(timeout > -1 and (time.time() - timeStart) >= timeout):
             timedOut = True
             break
         if(checkStdin()):
@@ -87,19 +133,16 @@ def __timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False
             if(inputCharacter != '\b' and inputCharacter != '\x7f'):
                 if(len(allowCharacters) and not inputCharacter in allowCharacters):
                     inputCharacter = ""
-                if(maxLength > 0):
-                    if(inputType != "float" and len(userInput) >= maxLength):
+                if(inputCharacter == "-" and inputType in ["integer", "float"]):
+                    if(len(userInput) > 0):
                         inputCharacter = ""
-                    elif((len(userInput) - periods) >= maxLength):
-                        inputCharacter = ""
+                if(maxLength > 0 and len(userInput) >= maxLength):
+                    inputCharacter = ""
                 if(inputType == "float"):
                     if(inputCharacter == ","):
                         inputCharacter = "."
-                    if(inputCharacter == "."):
-                        if(periods):
-                            inputCharacter = ""
-                        else:
-                            periods = 1
+                    if(inputCharacter == "." and inputCharacter in userInput):
+                        inputCharacter = ""
                 userInput = userInput + inputCharacter
                 print(inputCharacter, end='', flush=True)
                 if(maxLength == 1 and len(userInput) == 1 and inputType == "single"):
@@ -108,12 +151,10 @@ def __timedInput(prompt: str = "", timeOut: int = 5, forcedTimeout: bool = False
                 if(len(userInput)):
                     removeCharacter = userInput[len(
                         userInput) - 1:len(userInput)]
-                    if(removeCharacter == "."):
-                        periods = 0
                     userInput = userInput[0:len(userInput) - 1]
                     print("\u001b[1D \u001b[1D", end='',
                           flush=True, file=outStream)
-            if(not forcedTimeout):
+            if(resetOnInput and timeout > -1):
                 timeStart = time.time()
     print("")
     if(sys.platform != "win32"):

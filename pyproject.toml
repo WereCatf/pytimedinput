@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "pytimedinput"
-version = "1.3.1"
+version = "2.0.0"
 description = "Query a user for input with a timeout."
 authors = ["WereCatf <werecatf@runbox.com>"]
 maintainers = ["WereCatf <werecatf@runbox.com>"]
 license = "MIT"
 readme = "README.rst"
-homepage = ""
+homepage = "https://github.com/werecatf/pytimedinput/"
 repository = "https://github.com/werecatf/pytimedinput/"
 keywords = ["Text-input", "Shell", "Interactive", "Keyboard", "Input"]
 
