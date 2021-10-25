@@ -1,16 +1,14 @@
 import sys
+import time
 from typing import Tuple, Union
 if(sys.platform == "win32"):
     import msvcrt
-    import colorama
-    colorama.init(wrap=False)
-    outStream = colorama.AnsiToWin32(sys.stdout).stream
+    import ctypes
+    from ctypes import wintypes
 else:
     import select
     import tty
     import termios
-    outStream = sys.stdout
-import time
 
 
 def timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r") -> Tuple[str, bool]:
@@ -90,16 +88,6 @@ def timedFloat(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, al
 
 
 def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text") -> Tuple[str, bool]:
-    numbers = "01234567890"
-    if(inputType == "integer"):
-        allowCharacters += numbers
-    if(inputType == "float"):
-        allowCharacters += numbers + ".,"
-
-    if(not sys.__stdin__.isatty()):
-        raise RuntimeError(
-            "timedInput() requires an interactive shell, cannot continue.")
-
     def checkStdin():
         if(sys.platform == "win32"):
             return msvcrt.kbhit()
@@ -112,51 +100,87 @@ def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
         else:
             return sys.stdin.read(1)
 
-    userInput = ""
-    timeStart = time.time()
-    timedOut = False
-    if(len(prompt) > 0):
-        print(prompt, end='', flush=True, file=outStream)
+    if(not sys.__stdin__.isatty()):
+        raise RuntimeError(
+            "timedInput() requires an interactive shell, cannot continue.")
+    else:
+        __savedConsoleSettings = __getStdoutSettings()
+        __enableStdoutAnsiEscape()
 
-    if(sys.platform != "win32"):
-        old_settings = termios.tcgetattr(sys.stdin)
-        tty.setcbreak(sys.stdin.fileno())
+        numbers = "01234567890"
+        if(inputType == "integer"):
+            allowCharacters += numbers
+        if(inputType == "float"):
+            allowCharacters += numbers + ".,"
 
-    while(True):
-        if(timeout > -1 and (time.time() - timeStart) >= timeout):
-            timedOut = True
-            break
-        if(checkStdin()):
-            inputCharacter = readStdin()
-            if(inputCharacter in endCharacters):
+        userInput = ""
+        timeStart = time.time()
+        timedOut = False
+        if(len(prompt) > 0):
+            print(prompt, end='', flush=True)
+
+        while(True):
+            if(timeout > -1 and (time.time() - timeStart) >= timeout):
+                timedOut = True
                 break
-            if(inputCharacter != '\b' and inputCharacter != '\x7f'):
-                if(len(allowCharacters) and not inputCharacter in allowCharacters):
-                    inputCharacter = ""
-                if(inputCharacter == "-" and inputType in ["integer", "float"]):
-                    if(len(userInput) > 0):
-                        inputCharacter = ""
-                if(maxLength > 0 and len(userInput) >= maxLength):
-                    inputCharacter = ""
-                if(inputType == "float"):
-                    if(inputCharacter == ","):
-                        inputCharacter = "."
-                    if(inputCharacter == "." and inputCharacter in userInput):
-                        inputCharacter = ""
-                userInput = userInput + inputCharacter
-                print(inputCharacter, end='', flush=True)
-                if(maxLength == 1 and len(userInput) == 1 and inputType == "single"):
+            if(checkStdin()):
+                inputCharacter = readStdin()
+                if(inputCharacter in endCharacters):
                     break
-            else:
-                if(len(userInput)):
-                    removeCharacter = userInput[len(
-                        userInput) - 1:len(userInput)]
-                    userInput = userInput[0:len(userInput) - 1]
-                    print("\u001b[1D \u001b[1D", end='',
-                          flush=True, file=outStream)
-            if(resetOnInput and timeout > -1):
-                timeStart = time.time()
-    print("")
-    if(sys.platform != "win32"):
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-    return userInput, timedOut
+                if(inputCharacter != '\b' and inputCharacter != '\x7f'):
+                    if(len(allowCharacters) and not inputCharacter in allowCharacters):
+                        inputCharacter = ""
+                    if(inputCharacter == "-" and inputType in ["integer", "float"]):
+                        if(len(userInput) > 0):
+                            inputCharacter = ""
+                    if(maxLength > 0 and len(userInput) >= maxLength):
+                        inputCharacter = ""
+                    if(inputType == "float"):
+                        if(inputCharacter == ","):
+                            inputCharacter = "."
+                        if(inputCharacter == "." and inputCharacter in userInput):
+                            inputCharacter = ""
+                    userInput = userInput + inputCharacter
+                    print(inputCharacter, end='', flush=True)
+                    if(maxLength == 1 and len(userInput) == 1 and inputType == "single"):
+                        break
+                else:
+                    if(len(userInput)):
+                        userInput = userInput[0:len(userInput) - 1]
+                        print("\x1b[1D\x1b[0K", end='', flush=True)
+                if(resetOnInput and timeout > -1):
+                    timeStart = time.time()
+        print("")
+        __setStdoutSettings(__savedConsoleSettings)
+        return userInput, timedOut
+
+
+def __getStdoutSettings():
+    if(sys.platform == "win32"):
+        __savedConsoleSettings = wintypes.DWORD()
+        kernel32 = ctypes.windll.kernel32
+        # The Windows standard handle -11 is stdout
+        kernel32.GetConsoleMode(
+            kernel32.GetStdHandle(-11), ctypes.byref(__savedConsoleSettings))
+    else:
+        __savedConsoleSettings = termios.tcgetattr(sys.stdin)
+    return __savedConsoleSettings
+
+
+def __setStdoutSettings(__savedConsoleSettings):
+    if(sys.platform == "win32"):
+        kernel32 = ctypes.windll.kernel32
+        kernel32.SetConsoleMode(
+            kernel32.GetStdHandle(-11), __savedConsoleSettings)
+    else:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, __savedConsoleSettings)
+
+
+def __enableStdoutAnsiEscape():
+    if(sys.platform == "win32"):
+        kernel32 = ctypes.windll.kernel32
+        # Enable ANSI escape sequence parsing
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+    else:
+        # Should be enabled by default under Linux (and OSX?), just set cbreak-mode
+        tty.setcbreak(sys.stdin.fileno(), termios.TCSADRAIN)

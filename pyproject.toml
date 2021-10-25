@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytimedinput"
-version = "2.0.0"
+version = "2.0.1"
 description = "Query a user for input with a timeout."
 authors = ["WereCatf <werecatf@runbox.com>"]
 maintainers = ["WereCatf <werecatf@runbox.com>"]
@@ -12,7 +12,6 @@ keywords = ["Text-input", "Shell", "Interactive", "Keyboard", "Input"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-colorama = { version = '*', markers = "sys_platform == 'win32'" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
