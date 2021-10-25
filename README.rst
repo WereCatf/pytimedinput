@@ -25,7 +25,7 @@ timedInput()
 
 .. code:: python
 
-    def timedInput(prompt="", timeOut=5, resetOnInput=True, maxLength=0, allowCharacters="", endCharacters="\x1b\n\r")
+    def timedInput(prompt="", timeout=5, resetOnInput=True, maxLength=0, allowCharacters="", endCharacters="\x1b\n\r")
 
 The function *timedInput()* from *pytimedinput* accepts the following parameters:
 
@@ -65,7 +65,7 @@ timedKey()
 
 .. code:: python
 
-    def timedKey(prompt="", timeOut=5, resetOnInput=True, allowCharacters="")
+    def timedKey(prompt="", timeout=5, resetOnInput=True, allowCharacters="")
 
 The function *timedKey()* from *pytimedinput* accepts the following parameters:
 
@@ -110,7 +110,7 @@ timedInteger() and timedFloat()
 
 .. code:: python
 
-    def timedInteger(prompt="", timeOut=5, resetOnInput=True, allowNegative=True)
+    def timedInteger(prompt="", timeout=5, resetOnInput=True, allowNegative=True)
 
 The function *timedInteger()* and *timedFloat()* from *pytimedinput* accept the following parameters:
 
