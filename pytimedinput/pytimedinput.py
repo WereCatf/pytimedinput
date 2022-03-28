@@ -11,7 +11,7 @@ else:
     import termios
 
 
-def timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r") -> Tuple[str, bool]:
+def timedInput(prompt: str = "", timeout: float = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r") -> Tuple[str, bool]:
     """Ask the user for text input with an optional timeout and limit on allowed characters.
 
     Args:
@@ -32,7 +32,7 @@ def timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, ma
     return __timedInput(prompt, timeout, resetOnInput, maxLength, allowCharacters, endCharacters)
 
 
-def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowCharacters: str = "") -> Tuple[str, bool]:
+def timedKey(prompt: str = "", timeout: float = 5, resetOnInput: bool = True, allowCharacters: str = "") -> Tuple[str, bool]:
     """Ask the user to press a single key out of an optional list of allowed ones.
 
     Args:
@@ -47,7 +47,7 @@ def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allo
     return __timedInput(prompt, timeout, resetOnInput, maxLength=1, allowCharacters=allowCharacters, endCharacters="", inputType="single")
 
 
-def timedInteger(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[int, None], bool]:
+def timedInteger(prompt: str = "", timeout: float = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[int, None], bool]:
     """Ask the user to enter an integer value.
 
     Args:
@@ -67,7 +67,7 @@ def timedInteger(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
         return None, timedOut
 
 
-def timedFloat(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[float, None], bool]:
+def timedFloat(prompt: str = "", timeout: float = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[float, None], bool]:
     """Ask the user to enter a floating-point value.
 
     Args:
@@ -87,7 +87,7 @@ def timedFloat(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, al
         return None, timedOut
 
 
-def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text") -> Tuple[str, bool]:
+def __timedInput(prompt: str = "", timeout: float = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text") -> Tuple[str, bool]:
     def checkStdin():
         if(sys.platform == "win32"):
             return msvcrt.kbhit()
