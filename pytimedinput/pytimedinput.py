@@ -32,7 +32,7 @@ def timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, ma
     return __timedInput(prompt, timeout, resetOnInput, maxLength, allowCharacters, endCharacters)
 
 
-def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowCharacters: str = "") -> Tuple[str, bool]:
+def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowCharacters: str = "", toprint: bool = True) -> Tuple[str, bool]:
     """Ask the user to press a single key out of an optional list of allowed ones.
 
     Args:
@@ -44,7 +44,7 @@ def timedKey(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allo
     Returns:
         Tuple[str, bool]: Which key the user pressed and whether the input timed out or not.
     """
-    return __timedInput(prompt, timeout, resetOnInput, maxLength=1, allowCharacters=allowCharacters, endCharacters="", inputType="single")
+    return __timedInput(prompt, timeout, resetOnInput, maxLength=1, allowCharacters=allowCharacters, endCharacters="", inputType="single", toprint=toprint)
 
 
 def timedInteger(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, allowNegative: bool = True) -> Tuple[Union[int, None], bool]:
@@ -87,7 +87,7 @@ def timedFloat(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, al
         return None, timedOut
 
 
-def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text") -> Tuple[str, bool]:
+def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, maxLength: int = 0, allowCharacters: str = "", endCharacters: str = "\x1b\n\r", inputType: str = "text", toprint: bool = True) -> Tuple[str, bool]:
     def checkStdin():
         if(sys.platform == "win32"):
             return msvcrt.kbhit()
@@ -116,7 +116,7 @@ def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
         userInput = ""
         timeStart = time.time()
         timedOut = False
-        if(len(prompt) > 0):
+        if(len(prompt) > 0) and toprint:
             print(prompt, end='', flush=True)
 
         while(True):
@@ -141,16 +141,19 @@ def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
                         if(inputCharacter == "." and inputCharacter in userInput):
                             inputCharacter = ""
                     userInput = userInput + inputCharacter
-                    print(inputCharacter, end='', flush=True)
+                    if toprint:
+                        print(inputCharacter, end='', flush=True)
                     if(maxLength == 1 and len(userInput) == 1 and inputType == "single"):
                         break
                 else:
                     if(len(userInput)):
                         userInput = userInput[0:len(userInput) - 1]
-                        print("\x1b[1D\x1b[0K", end='', flush=True)
+                        if toprint:
+                            print("\x1b[1D\x1b[0K", end='', flush=True)
                 if(resetOnInput and timeout > -1):
                     timeStart = time.time()
-        print("")
+        if toprint:
+            print("")
         __setStdoutSettings(__savedConsoleSettings)
         return userInput, timedOut
 
@@ -184,3 +187,4 @@ def __enableStdoutAnsiEscape():
     else:
         # Should be enabled by default under Linux (and OSX?), just set cbreak-mode
         tty.setcbreak(sys.stdin.fileno(), termios.TCSADRAIN)
+        
