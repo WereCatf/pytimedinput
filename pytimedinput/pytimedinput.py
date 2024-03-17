@@ -125,6 +125,9 @@ def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
                 break
             if(checkStdin()):
                 inputCharacter = readStdin()
+                if inputCharacter == '\x04':  # ctrl-d pressed --> raise EOFError
+                    __setStdoutSettings(__savedConsoleSettings)
+                    raise EOFError
                 if(inputCharacter in endCharacters):
                     break
                 if(inputCharacter != '\b' and inputCharacter != '\x7f'):
