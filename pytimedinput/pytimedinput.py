@@ -153,6 +153,7 @@ def __timedInput(prompt: str = "", timeout: int = 5, resetOnInput: bool = True, 
                         print("\x1b[1D\x1b[0K", end='', flush=True)
                 if(resetOnInput and timeout > -1):
                     timeStart = time.time()
+            time.sleep(0.01)
         print("")
         __setStdoutSettings(__savedConsoleSettings)
         return userInput, timedOut
@@ -187,3 +188,10 @@ def __enableStdoutAnsiEscape():
     else:
         # Should be enabled by default under Linux (and OSX?), just set cbreak-mode
         tty.setcbreak(sys.stdin.fileno(), termios.TCSADRAIN)
+
+
+def main():
+    timedInput("Enter: ", timeout=5)
+
+if __name__ == '__main__':
+    main()
